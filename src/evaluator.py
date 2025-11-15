@@ -82,24 +82,19 @@ def evaluate_accuracy(generation: str, source: str, max_dist_ratio: float = 0.2)
     """
     references = _extract_references(generation)
 
-
     # having a total loss could potentially lead to the number of attributions decreasing as training progress
     total_loss = 0.0
     for reference in references:
         max_dist = max_dist_ratio * len(reference)
         distance = _find_closest_quote(reference, source, max_dist_ratio)
 
-        # skip if the quotes identical
-        if distance is 0:
-            continue
-
         # if the quote can't be found give it the maximumum penalty
         if distance is None:
             distance = max_dist
-
+        else:
+            distance = distance.dist
 
         # this punishes the result exponentially in reference to the ratio of max distance
-        total_loss+= -math.log(1- (distance/ max_dist + EPSILON))# epsilon to avoid divide by zero
-
+        total_loss += -math.log(1 - (distance / (max_dist + EPSILON)))  # epsilon to avoid divide by zero
 
     return total_loss
