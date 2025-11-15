@@ -1,1 +1,2 @@
 ATTRIBUTION_TOKEN: str = "<ATTRIBUTION>"
+EPSILON: float = 1e-6
