@@ -2,8 +2,7 @@ import re
 from src.constants import ATTRIBUTION_TOKEN
 
 
-
-def extract_quotes(generation: str) -> str:
+def extract_quotes(generation: str) -> list[str]:
     """
     Extract text between quotes that have been marked by an ATTRIBUTION_TOKEN
 
@@ -11,16 +10,19 @@ def extract_quotes(generation: str) -> str:
         generation (str): Input text containing attributed content
 
     Returns:
-        str: Extracted quote text marked by ATTRIBUTION_TOKEN, or empty string if not found
+        list[str]: List of extracted quote texts marked by ATTRIBUTION_TOKEN, or empty list if none found
     """
-    if not generation:
-        return ""
 
-    pattern = f"\".*\"{ATTRIBUTION_TOKEN}"
-    match = re.search(pattern, generation)
+    quotes: list[str] = []
 
-    if match:
+    # loop through all the quotes in the text.
+    for match in re.finditer(r'"(.*?)"', generation):
+        start, end = match.span()
+        quote_text = match.group(1)
 
-        return match.group(1).strip()
-    return ""
+        # check if the quote is followed by ATTRIBUTION_TOKEN
+        after = generation[end: end + len(ATTRIBUTION_TOKEN)]
+        if after == ATTRIBUTION_TOKEN:
+            quotes.append(quote_text)
 
+    return quotes
