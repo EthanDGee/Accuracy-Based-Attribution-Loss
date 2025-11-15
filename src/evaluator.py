@@ -3,7 +3,7 @@ from src.constants import ATTRIBUTION_TOKEN
 from fuzzysearch import find_near_matches
 
 
-def extract_quotes(generation: str) -> list[str]:
+def _extract_references(generation: str) -> list[str]:
     """
     Extract text between quotes that have been marked by an ATTRIBUTION_TOKEN
 
@@ -29,7 +29,7 @@ def extract_quotes(generation: str) -> list[str]:
     return quotes
 
 
-def find_closest_quote(quote: str, source: str, max_dist_ratio: float):
+def _find_closest_quote(quote: str, source: str, max_dist_ratio: float):
     max_l_dist = len(quote) * max_dist_ratio
 
     matches = find_near_matches(quote, source, max_l_dist=max_l_dist)
@@ -41,17 +41,3 @@ def find_closest_quote(quote: str, source: str, max_dist_ratio: float):
 
     return best_match
 
-
-def _measure_quote_accuracy(quote: str, source: str, max_dist_ratio) -> float:
-    # checks to see if a quote is in the text, if it's not it then attempts to fuzzy find the text until a similar match is found then it measures similarity to the quote
-
-    if quote in source:
-        return 1.0
-
-    best_match = find_near_matches(quote, source, max_l_dist=max_l_dist)
-
-    if not best_match:
-        return 0.0
-
-    min_distance = min(match.dist for match in best_match)
-    return 1.0 - (min_distance / len(quote))
