@@ -37,7 +37,7 @@ def _extract_surrounding(generation: str, n_tokens) -> list[tuple[str, str, str]
 
     for ref in references:
         # Find the reference in the text
-        ref_pattern = f'"{ref}"'
+        ref_pattern = f'"{ref}"{ATTRIBUTION_TOKEN}'
         ref_match = re.search(re.escape(ref_pattern), generation)
 
         if ref_match:
@@ -50,6 +50,7 @@ def _extract_surrounding(generation: str, n_tokens) -> list[tuple[str, str, str]
             alignments.append((before_text, ref, after_text))
 
     return alignments
+
 
 def _find_closest_quote(quote: str, source: str, max_dist_ratio: float):
     """

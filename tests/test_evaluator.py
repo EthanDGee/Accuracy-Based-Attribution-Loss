@@ -1,6 +1,46 @@
 # tests/test_evaluator.py
 from src.constants import ATTRIBUTION_TOKEN
-from src.evaluator import _extract_references, evaluate_accuracy, _find_closest_quote
+from src.evaluator import _extract_references, evaluate_accuracy, _find_closest_quote, _extract_surrounding
+
+
+class TestExtractSurrounding:
+
+    def test_basic_alignment(self):
+        # Test basic alignment with single reference
+        generation = f'Before "This is a test quote."{ATTRIBUTION_TOKEN} After'
+        surroundings = _extract_surrounding(generation, 10)
+        assert len(surroundings) == 1
+        assert surroundings[0][1] == "This is a test quote."
+        assert surroundings[0][0] == "Before"  # before context
+        assert surroundings[0][2] == "After"  # after context
+
+    def test_empty_input(self):
+        # Test with empty input
+        generation = ""
+        surroundings = _extract_surrounding(generation, 10)
+        assert len(surroundings) == 0
+
+    def test_multiple_references(self):
+        # Test with multiple references
+        generation = f'"First quote."{ATTRIBUTION_TOKEN} Some text "Second quote."{ATTRIBUTION_TOKEN}'
+        surroundings = _extract_surrounding(generation, 10)
+        assert len(surroundings) == 2
+        assert surroundings[0][1] == "First quote."
+        assert surroundings[0][0] == ""  # empty before context
+        assert surroundings[0][2] == "Some text"  # after context
+        assert surroundings[1][1] == "Second quote."
+        assert surroundings[1][0] == "Some text"  # before context
+        assert surroundings[1][2] == ""  # empty after context
+
+    def test_context_length(self):
+        # Test context length extraction
+        generation = f'Before text "Quote text."{ATTRIBUTION_TOKEN} After text'
+        surroundings = _extract_surrounding(generation, 6)
+        assert len(surroundings) == 1
+        assert len(surroundings[0][0]) <= 6  # before context
+        assert surroundings[0][0] == "text"
+        assert len(surroundings[0][2]) <= 6  # after context
+        assert surroundings[0][2] == "After"
 
 
 class TestFindClosestQuote:
