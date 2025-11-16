@@ -1,7 +1,8 @@
 import math
 import re
-from src.constants import ATTRIBUTION_TOKEN, EPSILON
+from src.constants import ATTRIBUTION_TOKEN, EPSILON, EMBEDDING_MODEL
 from fuzzysearch import find_near_matches
+import ollama
 
 
 def _extract_references(generation: str) -> list[str]:
@@ -29,6 +30,26 @@ def _extract_references(generation: str) -> list[str]:
 
     return quotes
 
+
+def _extract_surrounding(generation: str, n_tokens) -> list[tuple[str, str, str]]:
+    references = _extract_references(generation)
+    alignments = []
+
+    for ref in references:
+        # Find the reference in the text
+        ref_pattern = f'"{ref}"'
+        ref_match = re.search(re.escape(ref_pattern), generation)
+
+        if ref_match:
+            start, end = ref_match.span()
+
+            # Extract context before and after
+            before_text = generation[max(0, start - n_tokens):start].strip()
+            after_text = generation[end:min(end + n_tokens, len(generation))].strip()
+
+            alignments.append((before_text, ref, after_text))
+
+    return alignments
 
 def _find_closest_quote(quote: str, source: str, max_dist_ratio: float):
     """
