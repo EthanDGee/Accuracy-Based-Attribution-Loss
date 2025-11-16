@@ -120,3 +120,30 @@ def evaluate_accuracy(generation: str, source: str, max_dist_ratio: float = 0.2)
         total_loss += -math.log(1 - (distance / (max_dist + EPSILON)))  # epsilon to avoid divide by zero
 
     return total_loss
+
+
+def local_alignment(generation: str, n_tokens: int) -> float:
+    """
+    Extracts local context around reference points in the generated text.
+
+    Args:
+        generation (str): The generated text containing references
+        n_tokens (int): Number of tokens to extract before and after each reference
+
+    Returns:
+        list[tuple[str, str, str]]: List of tuples containing (before_context, reference, after_context)
+    """
+    # get the n-words sorrounding each quote
+    surrounding_quotes = _extract_surrounding(generation, n_tokens)
+
+    total_loss = 0.0
+    for quote in surrounding_quotes:
+        # embed the text to get semantics
+        surrounding = ollama.embed(model=EMBEDDING_MODEL, input=quote[0] + quote[2])
+        quote_emb = ollama.embed(model=EMBEDDING_MODEL, input=quote[1])
+        # by taking the cosine similarity we can easily measure the alignment
+        sim = (surrounding @ quote_emb) / (math.sqrt((surrounding @ surrounding) * (quote_emb @ quote_emb)) + EPSILON)
+        # scale the loss through the inverse log and add to total
+        total_loss += -math.log(sim + EPSILON)
+
+    return total_loss
