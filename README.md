@@ -6,7 +6,20 @@ With the modern focus on RAG based systems that leverage AI based systems to acc
 
 ### Quote Accuracy
 
+The first proposed loss function to improve accuracy works by extracting citations in a generated response marked by an attribution token, and fuzzily searching for the quoted text in the source document. This "fuzzy search" is based on lehvenstien distance calculation from quotes to source text with an arbirtray theshold hyperparameter set. Due to the fact that lehvenstien distance is a mere count of the number of additions and deletions required translate text into the souce text the theshold is set to be a percentage of total tokens replaced.
+
+The calcautaltion for accuracy of a given reference $r$ with a token count of $c$, a source text c a distance theshold of $t$,  and min_dist returing the minimal distance of search results of a source document.
+references =_extract_references(generation)
+$$
+m = t * c \\
+
+
+
+d= \begin{cases} \text{m}, & \text{mindist}(r, s)\text{ is nil}\\
+\text{\text{mindist}(r, s)\\}, & \text{otherwise} \end{cases}\\ 
+L(r, s) = - \log(1 - \frac{d}{m + \epsilon})  
+$$
+
+This places an exponentiall decay in the difference between quoted text and the ouput text. While giving an a massive penaly on hallucinated text. 
+
 ### Local Alignment
-
-### Global Alignment
-
