@@ -1,3 +1,6 @@
+#include <CUnit/Basic.h>
+#include <CUnit/CUnit.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -17,8 +20,8 @@ void tailString(char t[], char list[]) {
 }
 
 int levenshtein(char *a, char *b) {
-    printf("A:%s\n", a);
-    printf("B:%s\n", b);
+    // printf("A:%s\n", a);
+    // printf("B:%s\n", b);
 
     // a per word based implementation of the levenshtein algorithm
     // case where one string is empty
@@ -45,7 +48,7 @@ int levenshtein(char *a, char *b) {
     int skipBoth = 1 + levenshtein(tailA, tailB);
     int skipA = 1 + levenshtein(tailA, b);
     int skipB = 1 + levenshtein(a, tailB);
-    printf("Distance:%d,%d,%d\n", skipBoth, skipA, skipB);
+    // printf("Distance:%d,%d,%d\n", skipBoth, skipA, skipB);
 
     if (skipBoth <= skipA && skipBoth <= skipB)
         return skipBoth;
@@ -54,9 +57,38 @@ int levenshtein(char *a, char *b) {
     return skipB;
 }
 
+bool testLehvenshtein(char *a, char *b, int expectedResult) {
+    printf("Testing %s-%s\n", a, b) int result = levenshtein(a, b);
+    if (result == expectedResult)
+        printf("%s-%s: Passed\n", a, b);
+    else
+        printf("%s-%s: Failed Expected %d Got %d\n", a, b, expectedResult,
+               result);
+
+    return result == expectedResult;
+}
+
 int main() {
-    char a[] = "Health";
-    char b[] = "Health";
-    printf("Running\n");
-    printf("levenshtein distance:%d\n", levenshtein(a, b));
+    printf("Single Character\n");
+    testLehvenshtein("a", "a", 0);
+    testLehvenshtein("b", "a", 2);
+    testLehvenshtein("a", "b", 2);
+    testLehvenshtein("a", "", 1);
+    testLehvenshtein("", "b", 1);
+
+    printf("test_identical_strings\n");
+    testLehvenshtein("", "", 0);
+    testLehvenshtein("Hello", "Hello", 0);
+
+    printf("Empty Strings\n");
+    testLehvenshtein("", "abc", 3);
+    testLehvenshtein("abc", "", 3);
+
+    printf("General Cases\n");
+    testLehvenshtein("kitten", "sitting", 5);
+    testLehvenshtein("flaw", "lawn", 2);
+    testLehvenshtein("gumbo", "gambol", 3);
+    testLehvenshtein("book", "back", 4);
+
+    return 0;
 }
