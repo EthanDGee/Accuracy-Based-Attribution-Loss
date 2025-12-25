@@ -29,23 +29,25 @@ int min(int a, int b) {
     return b;
 }
 
+void print_2d_array(int rows, int cols, int array[rows][cols]) {
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            printf("%d\t", array[i][j]);
+        }
+        printf("\n");
+    }
+}
 int levenshtein(char *a, char *b) {
-    // printf("A:%s\n", a);
-    // printf("B:%s\n", b);
-
     // a per word based implementation of the levenshtein algorithm
     // case where one string is empty
 
     int a_length = strlen(a);
     int b_length = strlen(b);
 
-    if (a_length == 0) {
-        printf("A is Empty\n");
+    if (a_length == 0)
         return b_length;
-    } else if (b_length == 0) {
-        printf("B is Empty\n");
+    else if (b_length == 0)
         return a_length;
-    }
 
     // create the memoization array
     int results[a_length][b_length];
@@ -58,47 +60,34 @@ int levenshtein(char *a, char *b) {
         results[0][0] = 2;
 
     for (int a_i = 0; a_i < a_length; a_i++) {
-        for (int b_i = 0; b_i < b_length; b_i++) {
+        for (int b_i = a_i; b_i < b_length; b_i++) {
+            // skip base
+            if (a_i == 0 && b_i == 0)
+                continue;
+
             // match case
+            if (a_i == b_i) { // same length
+                if (a[a_i] == b[b_i])
+                    results[a_i][b_i] = results[a_i - 1][b_i - 1];
+                else
+                    results[a_i][b_i] = results[a_i - 1][b_i - 1] + 2;
+            } else {
+                if (a[a_i] == b[b_i]) {
 
-            int scoreChange;
-            if (a[a_i] == b[b_i])
-                scoreChange = 0;
-            else
-                scoreChange = 1;
-
-            // skip a case
-            int skipA;
-            int skipB;
-            int skipBoth;
-
-            if (a_i != 0)
-                skipA = results[a_i - 1][b_i];
-            else
-                skipA = INT_MIN; // this is done to prevent integer overflow
-
-            // skip b case
-            if (b_i != 0)
-                skipB = results[a_i][b_i - 1];
-            else
-                skipB = INT_MIN;
-
-            // skip both case
-            if (a_i != 0 && b_i != 0)
-                skipBoth = results[a_i - 1][b_i - 1];
-            else
-                skipBoth = INT_MIN;
-
-            // set best to min + scoreChange
-            results[a_i][b_i] = min(skipA, min(skipB, skipBoth)) + scoreChange;
+                    int use = results[a_i - 1][b_i - 1];
+                    int dont = results[a_i][b_i - 1] + 2;
+                    results[a_i][b_i] = min(use, dont);
+                } else
+                    // add letter to previous
+                    results[a_i][b_i] = results[a_i][b_i - 1] + 1;
+            }
         }
     }
-
+    // print_2d_array(a_length, b_length, results);
     return results[a_length - 1][b_length - 1];
 }
 
 bool testLehvenshtein(char *a, char *b, int expectedResult) {
-    printf("Testing %s-%s\n", a, b);
     int result = levenshtein(a, b);
     if (result == expectedResult)
         printf("%s-%s: Passed\n", a, b);
