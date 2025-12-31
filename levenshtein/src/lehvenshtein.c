@@ -5,7 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 
-void tailString(char t[], char list[]) {
+#define MAX_WORD_LENGTH 256
+#define MAX_WORDS 2048
+
+void tailString(const char list[], char t[]) {
     // if 't' is empty exit early
     if (strlen(list) == 0) {
         t[0] = '\0';
@@ -20,6 +23,56 @@ void tailString(char t[], char list[]) {
     t[strlen(list) - 1] = '\0';
 }
 
+void extractSubstring(const char string[], const int start, const int end,
+                      char result[]) {
+    // returns a substring of `string` based on the indexes (inclusive)
+    int len = strlen(string);
+
+    if (start < 0 || end > len || start >= end) {
+        result[0] = '\0';
+        return;
+    }
+
+    for (int i = start; i <= end; i++) {
+        result[i] = string[i];
+    }
+
+    result[end - start] = '\0';
+}
+
+int splitString(const char string[], char results[][MAX_WORD_LENGTH]) {
+
+    // takes a string and splits it by white space characters
+    // returns the words found in the form of a list in results
+    // and the number of words in the return call
+
+    int len = strlen(string);
+
+    char whitespace[] = " \t\n";
+    int bufferStart = 0;
+    int wordNumber = 0;
+
+    // loop through the string and add each new word to results
+    for (int i = 0; i < len; i++) {
+        if (strchr(whitespace, string[i]) != NULL) {
+            if (bufferStart < i && wordNumber < MAX_WORDS) {
+                extractSubstring(string, bufferStart, i - 1,
+                                 results[wordNumber]);
+                wordNumber++;
+            }
+            bufferStart = i + 1;
+        }
+    }
+
+    // also extract last word after the loop
+    if (bufferStart < len && wordNumber < MAX_WORDS) {
+        extractSubstring(string, bufferStart, len - 1, results[wordNumber]);
+        wordNumber++;
+    }
+
+    return wordNumber;
+}
+
 int min(int a, int b) {
     // returns the lowest nonnegative number
     if (a < b && a >= 0)
@@ -29,7 +82,8 @@ int min(int a, int b) {
     return b;
 }
 
-void print_2d_array(int rows, int cols, int array[rows][cols]) {
+void print_2d_array(const int rows, const int cols,
+                    const int array[rows][cols]) {
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
             printf("%d\t", array[i][j]);
@@ -121,8 +175,8 @@ int main() {
     testLehvenshtein("book", "back", 4);
 
     printf("\nCase Sensitivity\n");
-    testLehvenshtein("abc", "ABC", 3);
-    testLehvenshtein("Test", "test", 1);
+    testLehvenshtein("abc", "ABC", 6);
+    testLehvenshtein("Test", "test", 2);
 
     printf("\nPrefix/Suffix\n");
     testLehvenshtein("testing", "test", 3);
