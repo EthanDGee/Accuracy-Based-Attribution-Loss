@@ -21,7 +21,7 @@ void tailString(char t[], char list[]) {
 }
 
 int min(int a, int b) {
-    // returns the lowest nonnecative number
+    // returns the lowest nonnegative number
     if (a < b && a >= 0)
         return a;
     if (b < 0)
@@ -119,6 +119,21 @@ int main() {
     testLehvenshtein("flaw", "lawn", 2);
     testLehvenshtein("gumbo", "gambol", 3);
     testLehvenshtein("book", "back", 4);
+
+    printf("\nCase Sensitivity\n");
+    testLehvenshtein("abc", "ABC", 3);
+    testLehvenshtein("Test", "test", 1);
+
+    printf("\nPrefix/Suffix\n");
+    testLehvenshtein("testing", "test", 3);
+    testLehvenshtein("test", "testing", 3);
+
+    printf("\nTranspositions\n");
+    testLehvenshtein("abcdef", "abcedf", 2);
+
+    printf("\nLong Strings\n");
+    testLehvenshtein("abcdefghij", "abcdefghij", 0);
+    testLehvenshtein("abcdefghij", "jihgfedcba", 10);
 
     return 0;
 }
