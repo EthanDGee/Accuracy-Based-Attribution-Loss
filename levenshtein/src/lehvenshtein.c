@@ -91,54 +91,31 @@ void print_2d_array(const int rows, const int cols,
         printf("\n");
     }
 }
-int levenshtein(char *a, char *b) {
-    // a per word based implementation of the levenshtein algorithm
-    // case where one string is empty
 
+int levenshtein(char *a, char *b) {
     int a_length = strlen(a);
     int b_length = strlen(b);
 
-    if (a_length == 0)
-        return b_length;
-    else if (b_length == 0)
-        return a_length;
+    int results[a_length + 1][b_length + 1];
 
-    // create the memoization array
-    int results[a_length][b_length];
+    // Initialize base cases
+    for (int i = 0; i <= a_length; i++)
+        results[i][0] = i;
+    for (int j = 0; j <= b_length; j++)
+        results[0][j] = j;
 
-    // set base cases
-    if (a[0] == b[0])
-        results[0][0] = 0;
-    else
-        // requires deletion and insertion
-        results[0][0] = 2;
-
-    for (int a_i = 0; a_i < a_length; a_i++) {
-        for (int b_i = a_i; b_i < b_length; b_i++) {
-            // skip base
-            if (a_i == 0 && b_i == 0)
-                continue;
-
-            // match case
-            if (a_i == b_i) { // same length
-                if (a[a_i] == b[b_i])
-                    results[a_i][b_i] = results[a_i - 1][b_i - 1];
-                else
-                    results[a_i][b_i] = results[a_i - 1][b_i - 1] + 2;
-            } else {
-                if (a[a_i] == b[b_i]) {
-
-                    int use = results[a_i - 1][b_i - 1];
-                    int dont = results[a_i][b_i - 1] + 2;
-                    results[a_i][b_i] = min(use, dont);
-                } else
-                    // add letter to previous
-                    results[a_i][b_i] = results[a_i][b_i - 1] + 1;
-            }
+    // Fill the matrix
+    for (int i = 1; i <= a_length; i++) {
+        for (int j = 1; j <= b_length; j++) {
+            int cost = (a[i - 1] == b[j - 1]) ? 0 : 1;
+            int deletion = results[i - 1][j] + 1;
+            int insertion = results[i][j - 1] + 1;
+            int substitution = results[i - 1][j - 1] + cost;
+            results[i][j] = min(deletion, min(insertion, substitution));
         }
     }
-    // print_2d_array(a_length, b_length, results);
-    return results[a_length - 1][b_length - 1];
+
+    return results[a_length][b_length];
 }
 
 bool testLehvenshtein(char *a, char *b, int expectedResult) {
@@ -169,14 +146,14 @@ int main() {
     testLehvenshtein("abc", "", 3);
 
     printf("\nGeneral Cases\n");
-    testLehvenshtein("kitten", "sitting", 5);
+    testLehvenshtein("kitten", "sitting", 3);
     testLehvenshtein("flaw", "lawn", 2);
-    testLehvenshtein("gumbo", "gambol", 3);
-    testLehvenshtein("book", "back", 4);
+    testLehvenshtein("gumbo", "gambol", 2);
+    testLehvenshtein("book", "back", 2);
 
     printf("\nCase Sensitivity\n");
-    testLehvenshtein("abc", "ABC", 6);
-    testLehvenshtein("Test", "test", 2);
+    testLehvenshtein("abc", "ABC", 3);
+    testLehvenshtein("Test", "test", 1);
 
     printf("\nPrefix/Suffix\n");
     testLehvenshtein("testing", "test", 3);
